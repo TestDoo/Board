@@ -11,10 +11,37 @@ var bcrypt = require("bcryptjs");
 // 물론 이 값이 필요할 때는 특별한 설정을 해줘야 함 -> 이건 route에서 설정
 var userSchema = mongoose.Schema(
     {
-        username: { type: String, required: [true, "Username is required!"], unique: true },
-        password: { type: String, required: [true, "Password is required!"], select: false },
-        name: { type: String, required: [true, "Name is required!"] },
-        email: { type: String },
+        // user error 처리
+        // trim 은 문자열 앞뒤에 빈칸이 있는 경우 빈칸을 제거해 주는 옵션이다
+        // match에는 정규표현식이 들어가서 값이 regex에 부합하지 않으면 에러메시지를 내게 된다.
+        // 정규표현식은 문자열에 특정한 규칙에 맞는 문자열이 있는지 알아보는 표현식이다.
+
+        username: {
+            type: String,
+            required: [true, "Username is required!"],
+            // username을 위한 regex -> /^.{4,12}$/ : 해석하면 "문자열의 시작 위치에 길이 4 이상 12 이하인 문자열이 있고, 바로 다음이 문자열의 끝이여야 함".
+            // 즉 전체 길이가 4이상 12자리 이하의 문자열이라면 이 regex를 통과할 수 있습니다.
+            match: [/^.{4,12}$/, "Should be 4-12 characters!"],
+            trim: true,
+            unique: true,
+        },
+        password: {
+            type: String,
+            required: [true, "Password is required!"],
+            select: false,
+        },
+        name: {
+            type: String,
+            required: [true, "Name is required!"],
+            match: [/^.{4,12}$/, "Should be 4-12 characters!"],
+            trim: true,
+        },
+        email: {
+            type: String,
+            // 이메일을 위한 정규표현식 :
+            match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Should be a vaild email address!"],
+            trim: true,
+        },
     },
     {
         toObject: { virtuals: true },
@@ -60,6 +87,13 @@ userSchema
     });
 
 // password validation
+
+//  8-16자리 문자열 중에 숫자랑 영문자가 반드시 하나 이상 존재해야 한다는 뜻의 regex
+var passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
+
+// 반복되는 에러메시지를 변수로 선언
+var passwordRegexErrorMessage = "Should be minimum 8 characters of alphabet and number combination!";
+
 // 3 : password를 DB에서 생성, 수정하기 전에 값이 유효한지 확인하는 코드
 userSchema.path("password").validate(function (v) {
     // 3-1 : validation callback 함수 속에서 this는 user model이다. 헷갈리지 않도록 user 변수에 넣는다.
@@ -72,6 +106,13 @@ userSchema.path("password").validate(function (v) {
         // 이 항목을 이용해서 현재 password vaildation이 '회원가입' 단계인지, 아니면 '회원정보수정' 단계인지 알 수 있다.
         if (!user.passwordConfirmation) {
             user.invalidate("passwordConfirmation", "Password Confirmation is required.");
+        }
+
+        // user error 처리
+        // 정규표현식.test(문자열) 함수는 문자열에 정규표현식을 통과하는 부분이 있다면 true를, 그렇지 않다면 false를 반환합니다.
+        if (!passwordRegex.test(user.password)) {
+            // 정규표현식.test(문자열) 함수에서 false가 반환되는 경우 변수 passwordRegexErrorMessage에 저장된 문자열로 model.invalidate함수를 호출합니다.
+            user.invalidate("password", passwordRegexErrorMessage);
         }
 
         if (user.password !== user.passwordConfirmation) {
@@ -91,7 +132,12 @@ userSchema.path("password").validate(function (v) {
             user.invalidate("currentPassword", "Current Password is invalid!");
         }
 
-        if (user.newPassword !== user.passwordConfirmation) {
+        // user error 처리
+        // 정규표현식.test(문자열) 함수는 문자열에 정규표현식을 통과하는 부분이 있다면 true를, 그렇지 않다면 false를 반환합니다.
+        if (user.newPassword && !passwordRegex.test(user.newPassword)) {
+            // 정규표현식.test(문자열) 함수에서 false가 반환되는 경우 변수 passwordRegexErrorMessage에 저장된 문자열로 model.invalidate함수를 호출합니다.
+            user.invalidate("newPassword", passwordRegexErrorMessage);
+        } else if (user.newPassword !== user.passwordConfirmation) {
             user.invalidate("passwordConfirmation", "Password Confirmation does not matched!");
         }
     }

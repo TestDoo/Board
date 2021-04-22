@@ -4,6 +4,8 @@ var express = require("express");
 var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
+var flash = require("connect-flash");
+var session = require("express-session");
 var app = express();
 
 // DB setting
@@ -26,6 +28,17 @@ app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+// user error 처리 : flash를 초기화 합니다. 이제부터 req.flash라는 함수를 사용할 수 있습니다.
+app.use(flash());
+// user error 처리 : session은 서버에서 접속자를 구분시키는 역할을 합니다
+app.use(
+    session({
+        // secret는 session을 hash화 하는 값이다. 아무값이나 줘서 해커가 알수없게 하자
+        secret: "MySecret",
+        resave: true,
+        saveUninitialized: true,
+    })
+);
 
 // Routes
 // post, user routes
