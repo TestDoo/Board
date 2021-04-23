@@ -6,6 +6,7 @@ var router = express.Router();
 var Post = require("../models/Post");
 
 // Index
+// nav에 board버튼이 클릭되면 실행되는 라우터
 router.get("/", function (req, res) {
     // 1 : exec함수 앞에서 DB에서 데이터를 어떻게 찾을지, 어떻게 정렬할 지 등을 함수로 표현하고, exec안의 함수에서 해당 data를 받아와서 할일을 정하는 구조이다.
     // sort() 함수는 string이나 object를 받아서 데이터 정렬방법을 정의하는 함수다

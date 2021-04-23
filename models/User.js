@@ -50,6 +50,7 @@ var userSchema = mongoose.Schema(
 
 // virtuals
 // 2 : DB에 저장되는 값 이외의 항목이 필요할 땐 virtual 항목으로 만든다. 즉, passwordConfirmation, originalPassword, currentPassword, newPassword는 회원가입, 회원정보 수정을 위해 필요한 항목이지만, DB에 저장할 필요 없는 값들이다. 이처럼 DB에 저장할 필요는 없지만 model에서 사용하고 싶은 항목들은 virtual로 만듭니다.
+// 여기 있는 것들은 모두 값들이다. 굳이 DB에 저장 안해도 되는 값들! 함수로 착각하지 마라
 userSchema
     .virtual("passwordConfirmation")
     .get(function () {
@@ -87,7 +88,6 @@ userSchema
     });
 
 // password validation
-
 //  8-16자리 문자열 중에 숫자랑 영문자가 반드시 하나 이상 존재해야 한다는 뜻의 regex
 var passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
 
@@ -95,6 +95,7 @@ var passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,16}$/;
 var passwordRegexErrorMessage = "Should be minimum 8 characters of alphabet and number combination!";
 
 // 3 : password를 DB에서 생성, 수정하기 전에 값이 유효한지 확인하는 코드
+// 확인하는 path에 들어간 값이 유효한지 확인하는 값
 userSchema.path("password").validate(function (v) {
     // 3-1 : validation callback 함수 속에서 this는 user model이다. 헷갈리지 않도록 user 변수에 넣는다.
     var user = this;
@@ -134,6 +135,7 @@ userSchema.path("password").validate(function (v) {
 
         // user error 처리
         // 정규표현식.test(문자열) 함수는 문자열에 정규표현식을 통과하는 부분이 있다면 true를, 그렇지 않다면 false를 반환합니다.
+        // newPassword에 값이 있는데 정규표현식을 통과하지 못한다면..
         if (user.newPassword && !passwordRegex.test(user.newPassword)) {
             // 정규표현식.test(문자열) 함수에서 false가 반환되는 경우 변수 passwordRegexErrorMessage에 저장된 문자열로 model.invalidate함수를 호출합니다.
             user.invalidate("newPassword", passwordRegexErrorMessage);
