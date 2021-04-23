@@ -3,6 +3,7 @@
 var express = require("express");
 var router = express.Router();
 var User = require("../models/User");
+var util = require("../util");
 
 // Index
 // 1 :찾은 값을 정렬하는 기능이 추가됐음. sort함수를 말함. {username:1}이 들어가서 username을 기준으로 오름차순(asc)로 정렬하고 있다. -1은 내림차순이다
@@ -28,9 +29,8 @@ router.get("/new", function (req, res) {
 router.post("/", function (req, res) {
     User.create(req.body, function (err, user) {
         if (err) {
-            // user error 처리
             req.flash("user", req.body);
-            req.flash("errors", parseError(err));
+            req.flash("errors", util.parseError(err)); // 1
             return res.redirect("/users/new");
         }
         res.redirect("/users");
@@ -85,8 +85,8 @@ router.put("/:username", function (req, res, next) {
             user.save(function (err, user) {
                 if (err) {
                     req.flash("user", req.body);
-                    req.flash("errors", parseError(err));
-                    return res.redirect("/users/" + req.params.username + "/edit");
+                    req.flash("errors", util.parseError(err));
+                    return res.redirect("/users/" + req.params.username + "/edit"); // 1
                 }
                 res.redirect("/users/" + user.username);
             });
@@ -102,19 +102,3 @@ router.delete("/:username", function (req, res) {
 });
 
 module.exports = router;
-
-// functions
-function parseError(errors) {
-    var parsed = {};
-    if (errors.name == "ValidationError") {
-        for (var name in errors.errors) {
-            var validationError = errors.errors[name];
-            parsed[name] = { message: validationError.message };
-        }
-    } else if (errors.code == "11000" && errors.errmsg.indexOf("username") > 0) {
-        parsed.username = { message: "This username already exists!" };
-    } else {
-        parsed.unhandled = JSON.stringify(errors);
-    }
-    return parsed;
-}
