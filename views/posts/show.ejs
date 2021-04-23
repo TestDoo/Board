@@ -30,6 +30,8 @@
                     <div class="col-md-5 col-lg-4 col-xl-3 order-sm-1 order-md-2">
                         <!-- 1 : 공간분할 부트스트랩 -->
                         <div class="post-info card m-2 p-2">
+                            <!-- index와 마찬가지로 show에도 author항목을 추가하고, author가 있는 경우에 author의 username을 표시한다. -->
+                            <div class="border-bottom pb-1 mb-1"><span>Author</span> : <%= post.author ? post.author.username : "" %></div>
                             <!-- 2 : 게시글이 작성된, 수정된 시간을 출력함 -->
                             <div><span>Created</span> : <span data-date-time="<%= post.createdAt %>"></span></div>
                             <% if(post.updatedAt) { %>

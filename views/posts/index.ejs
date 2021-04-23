@@ -15,6 +15,8 @@
                 <thead class="thead-light">
                     <tr>
                         <th scope="col">Title</th>
+                        <!-- 테이블의 헤더에 author 추가 -->
+                        <th scope="col" class="author">Author</th>
                         <th scope="col" class="date">Date</th>
                     </tr>
                 </thead>
@@ -30,6 +32,10 @@
                     <tr>
                         <td>
                             <a href="/posts/<%= post._id %>"><div class="ellipsis"><%= post.title %></div></a>
+                        </td>
+                        <td class="author">
+                            <!-- author가 있는 경우 author의 username을 표시함 -->
+                            <div class="ellipsis"><%= post.author ? post.author.username : "" %></div>
                         </td>
                         <td class="date">
                             <!-- 1 : data-date가 span에 사용됨 -->
