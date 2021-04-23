@@ -6,6 +6,7 @@ var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
 var flash = require("connect-flash");
 var session = require("express-session");
+var passport = require("./config/passport");
 var app = express();
 
 // DB setting
@@ -39,6 +40,27 @@ app.use(
         saveUninitialized: true,
     })
 );
+
+// Passport
+// passport.initialize()는 passport를 초기화 시켜주는 함수, passport.session()는 passport를 session과 연결해 주는 함수로 둘다 반드시 필요합니다
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Custom Middlewares
+// app.use에 함수를 넣은 것을 middleware라고 합니다 -> 여기에 있는 함수는 app.use에 request가 올 때마다 route에 상관없이 무조건 해당 함수가 실행된다. 위치가 중요한데 app.use들 중에 가장 위에 있는 것부터 순서대로 실행된다.
+// next()는 다음 진행을 위해 필요한 파라미터
+app.use(function (req, res, next) {
+    // req.isAuthenticated()는 passport에서 제공하는 함수로, 현재 로그인이 되어있는지 아닌지를true,false로 return
+    res.locals.isAuthenticated = req.isAuthenticated();
+    // req.user는 passport에서 추가하는 항목으로 로그인이 되면 session으로 부터 user를 deserialize하여 생성
+    res.locals.currentUser = req.user;
+
+    // res.locals에 위 두가지를 담는데, res.locals에 담겨진 변수는 ejs에서 바로 사용가능
+    // res.locals.isAuthenticated는 ejs에서 user가 로그인이 되어 있는지 아닌지를 확인하는데 사용
+    // res.locals.currentUser는 로그인된 user의 정보를 불러오는데 사용됩니다.
+
+    next();
+});
 
 // Routes
 // post, user routes

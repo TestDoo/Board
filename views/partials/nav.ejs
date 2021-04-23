@@ -13,9 +13,14 @@
                 <li class="nav-item"><a href="/posts" class="nav-link">Board</a></li>
             </ul>
             <ul class="navbar-nav ml-auto">
-                <!-- 1 -->
-                <li class="nav-item"><a href="/users" class="nav-link">Users</a></li>
+                <!-- 1 : login이 된 경우(if(isAuthenticated))에는 My Account 메뉴와 Logout 메뉴을 보여주고, login을 하지 않은 경우(else)에는 Sign Up 메뉴와 Login 메뉴를 보여줍니다 -->
+                <% if(isAuthenticated){ %>
+                <li class="nav-item"><a href="/users/<%= currentUser.username %>" class="nav-link">My Account</a></li>
+                <li class="nav-item"><a href="/logout" class="nav-link">Logout</a></li>
+                <% } else { %>
                 <li class="nav-item"><a href="/users/new" class="nav-link">Sign Up</a></li>
+                <li class="nav-item"><a href="/login" class="nav-link">Login</a></li>
+                <% } %>
             </ul>
         </div>
     </div>
